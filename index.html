@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -91,7 +92,7 @@
                         width: size,
                         height: size,
                         animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, revolve ${orbitSpeed}s linear infinite, drift 10s ease-in-out infinite alternate`,
-                        animationDelay: `${index * 0.1}s, 0s, 0s`,
+                        animationDelay: `${index * 0.1s, 0s, 0s}`,
                         '--orbit-radius': `${orbitRadius}px`,
                     }}
                 >
@@ -125,23 +126,33 @@
         };
 
         // --- UI COMPONENTS ---
-        const Navbar = ({ onCategorySelect, onHomeClick }) => (
-            <nav className="fixed top-6 left-0 right-0 z-[60] flex justify-center px-4">
-                <div className="glass-panel bg-white/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-white/10 rounded-full px-2 py-1.5 flex items-center shadow-2xl">
-                    <button onClick={onHomeClick} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black transition-transform active:scale-90">
-                        <span className="material-icons text-sm">home</span>
-                    </button>
-                    <div className="flex items-center space-x-1 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-                        {['rich-media', 'banners', 'timb', 'social', 'wallpapers'].map(id => (
-                            <button key={id} onClick={() => onCategorySelect(id)} className="px-3 py-2 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                                {id.replace('-', ' ')}
-                            </button>
-                        ))}
+        const Navbar = ({ onCategorySelect, onHomeClick }) => {
+            const items = [
+                { label: 'Rich Media', id: 'rich-media' },
+                { label: 'Banners', id: 'banners' },
+                { label: 'Branding', id: 'branding' },
+                { label: 'Social', id: 'social' },
+                { label: 'Wallpapers', id: 'wallpapers' }
+            ];
+
+            return (
+                <nav className="fixed top-6 left-0 right-0 z-[60] flex justify-center px-4">
+                    <div className="glass-panel bg-white/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-white/10 rounded-full px-2 py-1.5 flex items-center shadow-2xl">
+                        <button onClick={onHomeClick} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black transition-transform active:scale-90">
+                            <span className="material-icons text-sm">home</span>
+                        </button>
+                        <div className="flex items-center space-x-1 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                            {items.map(item => (
+                                <button key={item.id} onClick={() => onCategorySelect(item.id)} className="px-3 py-2 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                        <button className="px-5 py-2 text-[9px] font-black uppercase tracking-widest text-white dark:text-black bg-zinc-900 dark:bg-white rounded-full ml-2">Connect</button>
                     </div>
-                    <button className="px-5 py-2 text-[9px] font-black uppercase tracking-widest text-white dark:text-black bg-zinc-900 dark:bg-white rounded-full ml-2">Connect</button>
-                </div>
-            </nav>
-        );
+                </nav>
+            );
+        };
 
         const Hero = () => {
             const first = "MAYUR".split("");
@@ -194,7 +205,7 @@
                     { title: "Hocco", desc: "Interactive Gaming Experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", tags: ["Game", "UI"], link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html" },
                     { title: "Nerolac Spark", desc: "Digital color experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", tags: ["Interactive", "Web"], link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" }
                 ],
-                'timb': [
+                'branding': [
                     { title: "Hair Essentials", desc: "The core ritual branding", img: "https://r.jina.ai/i/61f2249e088147d394e505cc334586f3", tags: ["Branding", "Care"] }
                 ],
                 'banners': [

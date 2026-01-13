@@ -9,8 +9,6 @@ interface LiquidBubbleProps {
   duration: number;
   delay: number;
   label: string;
-  img?: string;
-  icon?: string;
   isSpecial?: boolean;
   onBurst: (id: string) => void;
   orbitRadius: number;
@@ -19,7 +17,7 @@ interface LiquidBubbleProps {
 }
 
 const LiquidBubble: React.FC<LiquidBubbleProps> = ({ 
-  id, initialX, initialY, size, duration, delay, label, img, icon, isSpecial, onBurst, orbitRadius, orbitSpeed, index
+  id, initialX, initialY, size, duration, delay, label, isSpecial, onBurst, orbitRadius, orbitSpeed, index
 }) => {
   const [status, setStatus] = useState<'floating' | 'rupturing' | 'gone'>('floating');
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -67,20 +65,9 @@ const LiquidBubble: React.FC<LiquidBubbleProps> = ({
         ${status === 'rupturing' ? 'scale-[1.6] opacity-0 blur-xl animate-fadeOut' : 'opacity-80 scale-100'} 
         ${isSpecial ? 'bg-indigo-500/10' : 'bg-white/5'}`}>
         
-        {img ? (
-          <img 
-            src={img} 
-            alt={label} 
-            className="w-1/2 h-1/2 object-contain filter grayscale opacity-90 transition-opacity duration-700 group-hover:grayscale-0 group-hover:opacity-100" 
-            style={{ opacity: status === 'rupturing' ? 0 : undefined }}
-          />
-        ) : icon ? (
-          <span className="material-icons text-zinc-400 transition-opacity duration-700 group-hover:text-indigo-400" style={{ fontSize: '1.4rem', opacity: status === 'rupturing' ? 0 : 1 }}>{icon}</span>
-        ) : (
-          <span className="font-black uppercase tracking-[0.3em] text-zinc-400 text-[8px] md:text-[9px] text-center px-1 transition-opacity duration-700 group-hover:text-white" style={{ opacity: status === 'rupturing' ? 0 : 1 }}>
-            {label}
-          </span>
-        )}
+        <span className={`font-black uppercase tracking-[0.2em] text-zinc-400 text-[8px] md:text-[9px] text-center px-2 leading-tight transition-opacity duration-700 group-hover:text-white ${isSpecial ? 'text-indigo-300' : ''}`} style={{ opacity: status === 'rupturing' ? 0 : 1 }}>
+          {label}
+        </span>
 
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-40"></div>
         
@@ -108,13 +95,14 @@ const LiquidBubble: React.FC<LiquidBubbleProps> = ({
 
 const FloatingBackground: React.FC<{ onCategorySelect?: (cat: string) => void; isDimmed?: boolean; }> = ({ isDimmed }) => {
   const initialData = [
-    { label: "Photoshop", img: "https://upload.wikimedia.org/wikipedia/commons/a/af/Adobe_Photoshop_CC_icon.svg", size: "3.8rem", x: 35, y: 35, duration: 18, delay: 0, orbitRadius: 60, orbitSpeed: 40 },
-    { label: "Illustrator", img: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Adobe_Illustrator_CC_icon.svg", size: "3.4rem", x: 60, y: 32, duration: 22, delay: 5, orbitRadius: 80, orbitSpeed: 45 },
-    { label: "AI", size: "4.8rem", x: 48, y: 20, duration: 20, delay: 2, isSpecial: true, orbitRadius: 40, orbitSpeed: 35 },
-    { label: "Design", icon: "auto_awesome", size: "4rem", x: 28, y: 55, duration: 24, delay: 8, orbitRadius: 100, orbitSpeed: 50 },
-    { label: "Vision", size: "5.2rem", x: 68, y: 52, duration: 28, delay: 12, orbitRadius: 90, orbitSpeed: 55 },
-    { label: "Motion", icon: "blur_on", size: "4.4rem", x: 40, y: 70, duration: 26, delay: 15, orbitRadius: 70, orbitSpeed: 42 },
-    { label: "After Effects", img: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Adobe_After_Effects_CC_icon.svg", size: "3.8rem", x: 55, y: 65, duration: 24, delay: 18, orbitRadius: 65, orbitSpeed: 48 },
+    { label: "Visual Design", size: "4.8rem", x: 25, y: 25, duration: 18, delay: 0, orbitRadius: 70, orbitSpeed: 40, isSpecial: true },
+    { label: "Motion", size: "4.2rem", x: 70, y: 20, duration: 22, delay: 5, orbitRadius: 80, orbitSpeed: 45 },
+    { label: "CGI", size: "4rem", x: 45, y: 15, duration: 20, delay: 2, orbitRadius: 50, orbitSpeed: 35 },
+    { label: "AI", size: "4.4rem", x: 15, y: 60, duration: 24, delay: 8, orbitRadius: 90, orbitSpeed: 50, isSpecial: true },
+    { label: "Adobe Photoshop", size: "5.2rem", x: 75, y: 55, duration: 28, delay: 12, orbitRadius: 75, orbitSpeed: 55 },
+    { label: "Illustrator", size: "5rem", x: 35, y: 75, duration: 26, delay: 15, orbitRadius: 100, orbitSpeed: 42 },
+    { label: "After Effects", size: "5.4rem", x: 60, y: 78, duration: 24, delay: 18, orbitRadius: 110, orbitSpeed: 48, isSpecial: true },
+    { label: "Indesign", size: "4.6rem", x: 55, y: 40, duration: 22, delay: 10, orbitRadius: 60, orbitSpeed: 38 },
   ];
 
   const [bubbles, setBubbles] = useState(() => 

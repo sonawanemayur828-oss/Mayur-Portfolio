@@ -43,7 +43,7 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({ category, onBack }) => {
             link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html"
           }
         ];
-      case 'timb':
+      case 'branding':
         return [
           { 
             title: "Hair Essentials", 
