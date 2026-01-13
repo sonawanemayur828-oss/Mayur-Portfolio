@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 
 interface NavbarProps {
   onCategorySelect: (cat: string) => void;
@@ -7,9 +7,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onCategorySelect, onHomeClick }) => {
-  const [isConnectOpen, setIsConnectOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   const navItems = [
     { label: 'Rich Media', id: 'rich-media' },
     { label: 'Banners', id: 'banners' },
@@ -18,16 +15,6 @@ const Navbar: React.FC<NavbarProps> = ({ onCategorySelect, onHomeClick }) => {
     { label: 'Wallpapers', id: 'wallpapers' },
     { label: 'Marketing', id: 'marketing' },
   ];
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsConnectOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
     <nav className="fixed top-6 left-0 right-0 z-[60] flex justify-center w-full px-4">
@@ -51,44 +38,10 @@ const Navbar: React.FC<NavbarProps> = ({ onCategorySelect, onHomeClick }) => {
           ))}
         </div>
 
-        <div className="relative flex items-center ml-2" ref={dropdownRef}>
-          <button 
-            onClick={() => setIsConnectOpen(!isConnectOpen)}
-            className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white dark:text-black bg-zinc-900 dark:bg-white rounded-full hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
-          >
+        <div className="flex items-center space-x-2 ml-2">
+          <button className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white dark:text-black bg-zinc-900 dark:bg-white rounded-full hover:opacity-90 transition-opacity shadow-sm">
             Connect
-            <span className={`material-icons text-[14px] transition-transform duration-300 ${isConnectOpen ? 'rotate-180' : ''}`}>expand_more</span>
           </button>
-
-          {isConnectOpen && (
-            <div className="absolute top-full mt-3 right-0 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2 animate-fadeIn overflow-hidden">
-              <a 
-                href="mailto:sonawnemayur828@gmail.com"
-                className="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors group"
-              >
-                <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-all">
-                  <span className="material-icons text-sm">mail</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Gmail</span>
-                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 truncate">sonawnemayur828@gmail.com</span>
-                </div>
-              </a>
-
-              <a 
-                href="tel:+919561787649"
-                className="flex items-center gap-3 p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors group"
-              >
-                <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-all">
-                  <span className="material-icons text-sm">phone</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Mobile</span>
-                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200">+91 9561787649</span>
-                </div>
-              </a>
-            </div>
-          )}
         </div>
       </div>
     </nav>
