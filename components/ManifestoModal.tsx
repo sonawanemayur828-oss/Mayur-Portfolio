@@ -12,8 +12,16 @@ const ManifestoModal: React.FC<ManifestoModalProps> = ({ onClose }) => {
 
   useEffect(() => {
     const generateManifesto = async () => {
+      const apiKey = process.env.API_KEY;
+      
+      if (!apiKey) {
+        setManifesto('True design management is about finding harmony between the rigorous logic of a grid and the chaotic beauty of human emotion.');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',
           contents: "Write a short, poetic, 3-sentence designer manifesto for Mayur Sonawane, a Creative Manager. Focus on the intersection of strategic management, brutalist aesthetics, and digital innovation. No titles, just the content.",
@@ -24,6 +32,7 @@ const ManifestoModal: React.FC<ManifestoModalProps> = ({ onClose }) => {
         });
         setManifesto(response.text || 'Management is the art of invisible structures; design is the soul that fills them.');
       } catch (error) {
+        console.error("AI Generation failed:", error);
         setManifesto('True design management is about finding harmony between the rigorous logic of a grid and the chaotic beauty of human emotion.');
       } finally {
         setLoading(false);

@@ -4,73 +4,294 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Creative Designer Portfolio</title>
+    <title>Mayur Sonawane | Creative Portfolio</title>
+    
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#FFFFFF",
                         "background-light": "#F3F4F6",
                         "background-dark": "#050505",
-                        "surface-light": "#FFFFFF",
-                        "surface-dark": "#1A1A1A",
                     },
                     fontFamily: {
                         display: ["Inter", "sans-serif"],
-                    },
-                    animation: {
-                        'float-slow': 'float 8s ease-in-out infinite',
-                        'float-medium': 'float 6s ease-in-out infinite',
-                        'float-fast': 'float 4s ease-in-out infinite',
-                        'fadeIn': 'fadeIn 1s ease-out forwards',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0) rotate(var(--tw-rotate, 0deg))' },
-                            '50%': { transform: 'translateY(-15px) rotate(calc(var(--tw-rotate, 0deg) + 2deg))' },
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
                     }
                 },
             },
         };
     </script>
     <style>
-        ::-webkit-scrollbar {
-            display: none;
+        ::-webkit-scrollbar { display: none; }
+        body { margin: 0; padding: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; background: #050505; }
+        .text-stroke { -webkit-text-stroke: 1px currentColor; color: transparent; }
+        .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        
+        @keyframes letterFadeIn {
+          0% { opacity: 0; transform: translateY(20px) scale(0.9); filter: blur(10px); }
+          100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
-        .glass-panel {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        .letter-anim {
+          display: inline-block;
+          opacity: 0;
+          animation: letterFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-        body {
-            min-height: 100dvh;
+
+        @keyframes revolve {
+          from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+          to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
         }
-        .text-stroke {
-            -webkit-text-stroke: 1px currentColor;
-            color: transparent;
+        @keyframes drift {
+          0% { margin-top: 0px; margin-left: 0px; }
+          100% { margin-top: 15px; margin-left: 10px; }
         }
+        @keyframes bubblePopIn {
+          0% { transform: scale(0) rotate(-15deg); opacity: 0; filter: blur(5px); }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-out forwards; }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
   }
 }
 </script>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-white font-display transition-colors duration-500 overflow-hidden h-screen w-full relative">
+<body class="bg-background-dark text-white selection:bg-indigo-500/30">
     <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- COMPONENTS ---
+
+        const LiquidBubble = ({ label, isSpecial, initialX, initialY, size, orbitRadius, orbitSpeed, index }) => {
+            return (
+                <div 
+                    className="absolute pointer-events-none opacity-80"
+                    style={{
+                        left: `${initialX}%`,
+                        top: `${initialY}%`,
+                        width: size,
+                        height: size,
+                        animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, revolve ${orbitSpeed}s linear infinite, drift 10s ease-in-out infinite alternate`,
+                        animationDelay: `${index * 0.1}s, 0s, 0s`,
+                        '--orbit-radius': `${orbitRadius}px`,
+                    }}
+                >
+                    <div className={`w-full h-full flex items-center justify-center rounded-full border border-white/10 backdrop-blur-md shadow-2xl transition-all duration-700 ${isSpecial ? 'bg-indigo-500/20 ring-1 ring-indigo-500/30' : 'bg-white/5'}`}>
+                        <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest text-center px-2 leading-tight ${isSpecial ? 'text-indigo-200' : 'text-zinc-400'}`}>
+                            {label}
+                        </span>
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-40"></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const FloatingBackground = ({ isDimmed }) => {
+            const bubbles = [
+                { label: "Visual Design", size: "5.5rem", x: 25, y: 25, orbitRadius: 80, orbitSpeed: 45, isSpecial: true },
+                { label: "Motion", size: "4.5rem", x: 70, y: 20, orbitRadius: 60, orbitSpeed: 38 },
+                { label: "CGI", size: "4rem", x: 45, y: 15, orbitRadius: 40, orbitSpeed: 30 },
+                { label: "AI", size: "4.5rem", x: 15, y: 60, orbitRadius: 90, orbitSpeed: 50, isSpecial: true },
+                { label: "Adobe Photoshop", size: "5.2rem", x: 75, y: 55, orbitRadius: 75, orbitSpeed: 42 },
+                { label: "Illustrator", size: "5rem", x: 35, y: 75, orbitRadius: 100, orbitSpeed: 55 },
+                { label: "After Effects", size: "5.4rem", x: 60, y: 78, orbitRadius: 110, orbitSpeed: 48, isSpecial: true },
+                { label: "Indesign", size: "4.8rem", x: 55, y: 40, orbitRadius: 70, orbitSpeed: 35 }
+            ];
+            return (
+                <div className={`fixed inset-0 z-0 transition-all duration-[2000ms] ${isDimmed ? 'opacity-10 blur-3xl scale-110' : 'opacity-100'}`}>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_70%)]"></div>
+                    {bubbles.map((b, i) => <LiquidBubble key={i} index={i} {...b} initialX={b.x} initialY={b.y} />)}
+                </div>
+            );
+        };
+
+        const Navbar = ({ onCategorySelect, onHomeClick }) => (
+            <nav className="fixed top-6 left-0 right-0 z-[60] flex justify-center px-4">
+                <div className="glass-panel bg-white/10 dark:bg-zinc-900/60 border border-white/10 rounded-full px-2 py-1.5 flex items-center shadow-2xl">
+                    <button onClick={onHomeClick} className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-black transition-transform active:scale-90">
+                        <span className="material-icons text-sm">home</span>
+                    </button>
+                    <div className="flex items-center space-x-1 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                        {['rich-media', 'banners', 'timb', 'social', 'wallpapers'].map(id => (
+                            <button key={id} onClick={() => onCategorySelect(id)} className="px-3 py-2 hover:text-white transition-colors">
+                                {id.replace('-', ' ')}
+                            </button>
+                        ))}
+                    </div>
+                    <button className="px-5 py-2 text-[9px] font-black uppercase tracking-widest text-black bg-white rounded-full ml-2">Connect</button>
+                </div>
+            </nav>
+        );
+
+        const Hero = () => {
+            const first = "MAYUR".split("");
+            const last = "SONAWANE".split("");
+            return (
+                <div className="relative z-10 flex flex-col items-center justify-center h-screen w-full pointer-events-none px-6">
+                    <div className="text-[10px] tracking-[0.8em] uppercase text-zinc-500 font-black mb-8 animate-pulse">Creative Manager</div>
+                    <div className="flex flex-col items-center">
+                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase flex">
+                            {first.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${i*0.1}s`}}>{c}</span>)}
+                        </h1>
+                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase text-stroke text-zinc-800 flex">
+                            {last.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${0.5 + i*0.1}s`}}>{c}</span>)}
+                        </h1>
+                    </div>
+                    <div className="mt-8">
+                        <span className="text-[3vw] md:text-[1.5vw] font-black tracking-[1.2em] uppercase text-zinc-100/10">Creative Manager</span>
+                    </div>
+                    <div className="mt-12 flex flex-col items-center gap-6 opacity-0 animate-[fadeIn_1s_ease-out_forwards_2.2s] pointer-events-auto">
+                        <div className="px-8 py-3 rounded-full border border-white/10 bg-white/5 text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                            </span>
+                            Ready for Collaboration
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Footer = ({ isDarkMode, onToggleTheme, onManifestoClick }) => (
+            <footer className="fixed bottom-0 left-0 right-0 z-50 p-8 flex justify-between items-end">
+                <div className="glass-panel bg-white/5 border border-white/10 rounded-full p-1 flex">
+                    <button onClick={() => !isDarkMode && onToggleTheme()} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>Dark</button>
+                    <button onClick={() => isDarkMode && onToggleTheme()} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!isDarkMode ? 'bg-white text-black' : 'text-zinc-500'}`}>Light</button>
+                </div>
+                <button onClick={onManifestoClick} className="flex items-center gap-3 group">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Manifesto</span>
+                    <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center group-hover:translate-y-1 transition-transform">
+                        <span className="material-icons text-sm">keyboard_arrow_down</span>
+                    </div>
+                </button>
+            </footer>
+        );
+
+        const ProjectGrid = ({ category, onBack }) => {
+            const projects = {
+                'rich-media': [
+                    { title: "Hocco", desc: "Interactive Gaming Experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", tags: ["Game", "UI"] },
+                    { title: "Nerolac Spark", desc: "Digital color experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", tags: ["Interactive", "Web"] }
+                ],
+                'timb': [
+                    { title: "Hair Essentials", desc: "The core ritual branding", img: "https://r.jina.ai/i/61f2249e088147d394e505cc334586f3", tags: ["Branding", "Care"] }
+                ],
+                'banners': [
+                    { title: "Zenith Apparel", desc: "Brutalist web layouts", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1080&auto=format&fit=crop", tags: ["Layout", "Fashion"] }
+                ],
+                'social': [
+                    { title: "Vanguard Stories", desc: "Instagram immersive design", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1080&auto=format&fit=crop", tags: ["Social", "Creative"] }
+                ]
+            };
+            const items = projects[category] || [];
+            return (
+                <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-8 gap-6">
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Portfolio</span>
+                            <h2 className="text-6xl font-black uppercase tracking-tighter">{category.replace('-', ' ')}</h2>
+                        </div>
+                        <button onClick={onBack} className="px-8 py-3 rounded-full bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2">
+                            <span className="material-icons text-sm">arrow_back</span> Back
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {items.map((p, i) => (
+                            <div key={i} className="group bg-zinc-900/50 rounded-[2.5rem] overflow-hidden border border-white/5 hover:-translate-y-2 transition-all">
+                                <div className="aspect-[4/5] overflow-hidden">
+                                    <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                </div>
+                                <div className="p-8">
+                                    <div className="flex gap-2 mb-4">
+                                        {p.tags.map(t => <span key={t} className="text-[8px] border border-white/20 px-2 py-1 rounded-full uppercase font-black text-zinc-500">{t}</span>)}
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-2">{p.title}</h3>
+                                    <p className="text-zinc-500 text-sm leading-relaxed">{p.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ManifestoModal = ({ onClose }) => (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={onClose} />
+                <div className="relative w-full max-w-xl bg-zinc-900 border border-white/10 p-12 rounded-[3rem] animate-fadeIn text-center">
+                    <div className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 mb-8">Designer Manifesto</div>
+                    <p className="text-2xl font-medium leading-relaxed italic text-zinc-200">
+                        "Design is the silent management of chaos, where logic meets the untamed beauty of human connection. We curate digital experiences through strategic management and creative vision."
+                    </p>
+                    <button onClick={onClose} className="mt-12 mx-auto w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
+                        <span className="material-icons">close</span>
+                    </button>
+                </div>
+            </div>
+        );
+
+        // --- MAIN APP ---
+
+        const App = () => {
+            const [isDarkMode, setIsDarkMode] = useState(true);
+            const [activeCategory, setActiveCategory] = useState(null);
+            const [isManifestoOpen, setIsManifestoOpen] = useState(false);
+
+            useEffect(() => {
+                document.documentElement.className = isDarkMode ? 'dark' : '';
+                if (activeCategory) {
+                    document.body.style.overflow = 'auto';
+                } else {
+                    document.body.style.overflow = 'hidden';
+                }
+            }, [isDarkMode, activeCategory]);
+
+            return (
+                <div className={`min-h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white' : 'bg-gray-100 text-black'}`}>
+                    <FloatingBackground isDimmed={!!activeCategory} />
+                    <Navbar onCategorySelect={setActiveCategory} onHomeClick={() => setActiveCategory(null)} />
+                    
+                    {activeCategory ? (
+                        <ProjectGrid category={activeCategory} onBack={() => setActiveCategory(null)} />
+                    ) : (
+                        <Hero />
+                    )}
+
+                    <Footer 
+                        isDarkMode={isDarkMode} 
+                        onToggleTheme={() => setIsDarkMode(!isDarkMode)} 
+                        onManifestoClick={() => setIsManifestoOpen(true)}
+                    />
+
+                    {isManifestoOpen && <ManifestoModal onClose={() => setIsManifestoOpen(false)} />}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>

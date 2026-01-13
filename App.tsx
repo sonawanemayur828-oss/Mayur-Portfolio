@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
-    <div className={`relative w-full min-h-screen transition-colors duration-700 ${activeCategory ? 'overflow-y-auto' : 'h-screen overflow-hidden'}`}>
+    <div className={`relative w-full min-h-screen transition-colors duration-700 bg-background-light dark:bg-background-dark ${activeCategory ? 'overflow-y-auto' : 'h-screen overflow-hidden'}`}>
       <FloatingBackground 
         onCategorySelect={(cat) => setActiveCategory(cat)} 
         isDimmed={!!activeCategory} 

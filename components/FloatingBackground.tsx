@@ -25,8 +25,7 @@ const LiquidBubble: React.FC<LiquidBubbleProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Lifespan before pop
-    const lifeSpan = 18000 + Math.random() * 22000;
+    const lifeSpan = 15000 + Math.random() * 20000;
     const timer = setTimeout(() => {
       setStatus('rupturing');
       if (audioRef.current) {
@@ -52,23 +51,21 @@ const LiquidBubble: React.FC<LiquidBubbleProps> = ({
         top: `${initialY}%`,
         width: size,
         height: size,
-        // Combined: pop-in (entry), revolve (orbital), drift (micro-float)
         animation: `
           bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, 
           revolve ${orbitSpeed}s linear infinite,
           drift ${duration}s ease-in-out infinite alternate
         `,
-        // Staggered delay for pop-in based on index
         animationDelay: `${index * 0.15}s, -${delay}s, -${delay}s`,
         '--orbit-radius': `${orbitRadius}px`,
-        opacity: 0, // Start hidden for popIn/FadeIn animation
+        opacity: 0, 
       } as any}
     >
       <audio ref={audioRef} src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" />
       
       <div className={`relative w-full h-full flex items-center justify-center rounded-full border border-white/20 dark:border-zinc-700/40 backdrop-blur-md shadow-2xl transition-all duration-1000 
         ${status === 'rupturing' ? 'scale-[1.6] opacity-0 blur-xl animate-fadeOut' : 'opacity-80 scale-100'} 
-        ${isSpecial ? 'bg-indigo-500/5' : 'bg-white/5'}`}>
+        ${isSpecial ? 'bg-indigo-500/10' : 'bg-white/5'}`}>
         
         {img ? (
           <img 
@@ -131,7 +128,6 @@ const FloatingBackground: React.FC<{ onCategorySelect?: (cat: string) => void; i
     setBubbles(prev => {
       const target = prev.find(b => b.id === id);
       if (!target) return prev;
-      
       const respawned = {
         ...target,
         id: `bub-${Math.random().toString(36).substr(2, 5)}`,
@@ -144,7 +140,7 @@ const FloatingBackground: React.FC<{ onCategorySelect?: (cat: string) => void; i
   };
 
   return (
-    <div className={`fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#050505] transition-all duration-[2500ms] ${isDimmed ? 'opacity-15 blur-2xl scale-105' : 'opacity-100'}`}>
+    <div className={`fixed inset-0 pointer-events-none z-0 overflow-hidden bg-[#050505] transition-all duration-[2000ms] ${isDimmed ? 'opacity-10 blur-3xl scale-110' : 'opacity-100'}`}>
       <style>{`
         @keyframes bubblePopIn {
           0% { transform: scale(0) rotate(-15deg); opacity: 0; filter: blur(5px); }
@@ -175,25 +171,10 @@ const FloatingBackground: React.FC<{ onCategorySelect?: (cat: string) => void; i
         .animate-ripple { animation: ripple 1.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
         .animate-particleBurst { animation: particleBurst 0.9s ease-out forwards; }
       `}</style>
-
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.02)_0%,transparent_80%)]"></div>
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.015] mix-blend-screen"></div>
-
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.03)_0%,transparent_70%)]"></div>
       {bubbles.map((bubble, idx) => (
-        <LiquidBubble 
-          key={bubble.id}
-          {...bubble}
-          index={idx}
-          initialX={bubble.x}
-          initialY={bubble.y}
-          onBurst={handleBurst}
-        />
+        <LiquidBubble key={bubble.id} {...bubble} index={idx} initialX={bubble.x} initialY={bubble.y} onBurst={handleBurst} />
       ))}
-
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-indigo-500/[0.02] blur-[150px] rounded-full"></div>
-        <div className="absolute bottom-[10%] right-[15%] w-[500px] h-[500px] bg-blue-500/[0.02] blur-[180px] rounded-full"></div>
-      </div>
     </div>
   );
 };
