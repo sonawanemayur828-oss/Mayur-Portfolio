@@ -1,6 +1,5 @@
-
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -10,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    
+    <!-- React & Babel UMD (Bypasses security/module errors) -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,31 +21,32 @@
             theme: {
                 extend: {
                     colors: {
-                        "background-light": "#F3F4F6",
+                        "background-light": "#F9FAFB",
                         "background-dark": "#050505",
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
                     }
                 },
             },
         };
     </script>
+
     <style>
         ::-webkit-scrollbar { display: none; }
-        body { margin: 0; padding: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; background: #050505; }
+        body { 
+            margin: 0; padding: 0; overflow-x: hidden; 
+            font-family: 'Inter', sans-serif; background: #F9FAFB; color: #111827; 
+            min-height: 100vh;
+        }
         .text-stroke { -webkit-text-stroke: 1px currentColor; color: transparent; }
         .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-out forwards; }
         
         @keyframes letterFadeIn {
           0% { opacity: 0; transform: translateY(20px) scale(0.9); filter: blur(10px); }
           100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
-        .letter-anim {
-          display: inline-block;
-          opacity: 0;
-          animation: letterFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
+        .letter-anim { display: inline-block; opacity: 0; animation: letterFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
         @keyframes revolve {
           from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
@@ -58,53 +60,40 @@
           0% { transform: scale(0) rotate(-15deg); opacity: 0; filter: blur(5px); }
           100% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn { animation: fadeIn 0.8s ease-out forwards; }
     </style>
 <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
   }
 }
 </script>
 </head>
-<body class="bg-background-dark dark:bg-background-dark text-zinc-900 dark:text-white selection:bg-indigo-500/30">
+<body class="bg-background-light transition-colors duration-500 text-zinc-900">
     <div id="root"></div>
 
     <script type="text/babel">
+        // Using global React variables instead of imports to prevent "Script error"
         const { useState, useEffect, useRef } = React;
 
-        // --- BUBBLE COMPONENT ---
-        const LiquidBubble = ({ label, isSpecial, initialX, initialY, size, orbitRadius, orbitSpeed, index }) => {
-            return (
-                <div 
-                    className="absolute pointer-events-none opacity-80"
-                    style={{
-                        left: `${initialX}%`,
-                        top: `${initialY}%`,
-                        width: size,
-                        height: size,
-                        animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, revolve ${orbitSpeed}s linear infinite, drift 10s ease-in-out infinite alternate`,
-                        animationDelay: `${index * 0.1s, 0s, 0s}`,
-                        '--orbit-radius': `${orbitRadius}px`,
-                    }}
-                >
-                    <div className={`w-full h-full flex items-center justify-center rounded-full border border-zinc-200 dark:border-white/10 backdrop-blur-md shadow-2xl transition-all duration-700 ${isSpecial ? 'bg-indigo-500/10 ring-1 ring-indigo-500/30' : 'bg-white/5 dark:bg-white/5 bg-zinc-100'}`}>
-                        <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest text-center px-2 leading-tight ${isSpecial ? 'text-indigo-600 dark:text-indigo-200' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                            {label}
-                        </span>
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-40"></div>
-                    </div>
+        // --- BACKGROUND COMPONENTS ---
+        const LiquidBubble = ({ label, isSpecial, initialX, initialY, size, orbitRadius, orbitSpeed, index }) => (
+            <div className="absolute pointer-events-none opacity-30"
+                style={{
+                    left: `${initialX}%`, top: `${initialY}%`, width: size, height: size,
+                    animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, revolve ${orbitSpeed}s linear infinite, drift 10s ease-in-out infinite alternate`,
+                    animationDelay: `${index * 0.1}s, 0s, 0s`,
+                    '--orbit-radius': `${orbitRadius}px`,
+                }}>
+                <div className={`w-full h-full flex items-center justify-center rounded-full border border-zinc-300 backdrop-blur-md transition-all duration-700 ${isSpecial ? 'bg-indigo-500/10' : 'bg-zinc-900/5'}`}>
+                    <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest text-center px-2 leading-tight ${isSpecial ? 'text-indigo-600' : 'text-zinc-500'}`}>
+                        {label}
+                    </span>
                 </div>
-            );
-        };
+            </div>
+        );
 
         const FloatingBackground = ({ isDimmed }) => {
             const bubbles = [
@@ -112,43 +101,43 @@
                 { label: "Motion", size: "4.5rem", x: 70, y: 20, orbitRadius: 60, orbitSpeed: 38 },
                 { label: "CGI", size: "4rem", x: 45, y: 15, orbitRadius: 40, orbitSpeed: 30 },
                 { label: "AI", size: "4.5rem", x: 15, y: 60, orbitRadius: 90, orbitSpeed: 50, isSpecial: true },
-                { label: "Adobe Photoshop", size: "5.2rem", x: 75, y: 55, orbitRadius: 75, orbitSpeed: 42 },
+                { label: "Photoshop", size: "5.2rem", x: 75, y: 55, orbitRadius: 75, orbitSpeed: 42 },
                 { label: "Illustrator", size: "5rem", x: 35, y: 75, orbitRadius: 100, orbitSpeed: 55 },
                 { label: "After Effects", size: "5.4rem", x: 60, y: 78, orbitRadius: 110, orbitSpeed: 48, isSpecial: true },
-                { label: "Indesign", size: "4.8rem", x: 55, y: 40, orbitRadius: 70, orbitSpeed: 35 }
+                { label: "InDesign", size: "4.8rem", x: 55, y: 40, orbitRadius: 70, orbitSpeed: 35 }
             ];
             return (
-                <div className={`fixed inset-0 z-0 transition-all duration-[2000ms] ${isDimmed ? 'opacity-10 blur-3xl scale-110' : 'opacity-100'}`}>
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_70%)]"></div>
+                <div className={`fixed inset-0 z-0 transition-all duration-[2000ms] ${isDimmed ? 'opacity-5 blur-3xl scale-110' : 'opacity-100'}`}>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.04)_0%,transparent_70%)]"></div>
                     {bubbles.map((b, i) => <LiquidBubble key={i} index={i} {...b} initialX={b.x} initialY={b.y} />)}
                 </div>
             );
         };
 
-        // --- UI COMPONENTS ---
+        // --- NAVIGATION COMPONENT ---
         const Navbar = ({ onCategorySelect, onHomeClick }) => {
-            const items = [
+            const navItems = [
                 { label: 'Rich Media', id: 'rich-media' },
                 { label: 'Banners', id: 'banners' },
                 { label: 'Branding', id: 'branding' },
+                // Timb Removed from top-level
                 { label: 'Social', id: 'social' },
-                { label: 'Wallpapers', id: 'wallpapers' }
+                { label: 'Wallpapers', id: 'wallpapers' },
+                { label: 'Marketing', id: 'marketing' },
+                { label: 'About Me', id: 'about-me' }
             ];
 
             return (
                 <nav className="fixed top-6 left-0 right-0 z-[60] flex justify-center px-4">
-                    <div className="glass-panel bg-white/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-white/10 rounded-full px-2 py-1.5 flex items-center shadow-2xl">
-                        <button onClick={onHomeClick} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black transition-transform active:scale-90">
+                    <div className="glass-panel bg-white/80 border border-zinc-200 rounded-full px-2 py-1.5 flex items-center shadow-2xl">
+                        <button onClick={onHomeClick} className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 text-white transition-transform active:scale-90">
                             <span className="material-icons text-sm">home</span>
                         </button>
-                        <div className="flex items-center space-x-1 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-                            {items.map(item => (
-                                <button key={item.id} onClick={() => onCategorySelect(item.id)} className="px-3 py-2 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                                    {item.label}
-                                </button>
+                        <div className="flex items-center space-x-1 px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 overflow-x-auto no-scrollbar">
+                            {navItems.map(item => (
+                                <button key={item.id} onClick={() => onCategorySelect(item.id)} className="px-3 py-2 hover:text-zinc-900 transition-colors whitespace-nowrap">{item.label}</button>
                             ))}
                         </div>
-                        <button className="px-5 py-2 text-[9px] font-black uppercase tracking-widest text-white dark:text-black bg-zinc-900 dark:bg-white rounded-full ml-2">Connect</button>
                     </div>
                 </nav>
             );
@@ -158,147 +147,322 @@
             const first = "MAYUR".split("");
             const last = "SONAWANE".split("");
             return (
-                <div className="relative z-10 flex flex-col items-center justify-center h-screen w-full pointer-events-none px-6">
-                    <div className="text-[10px] tracking-[0.8em] uppercase text-zinc-400 dark:text-zinc-500 font-black mb-8 animate-pulse">Creative Manager</div>
+                <div className="relative z-10 flex flex-col items-center justify-end h-screen w-full pointer-events-none px-6 pb-32">
+                    <div className="text-[10px] tracking-[0.8em] uppercase text-zinc-400 font-black mb-12 animate-fadeIn">Design & Innovation</div>
                     <div className="flex flex-col items-center">
-                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase flex text-zinc-900 dark:text-white">
+                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase flex text-zinc-900 select-none">
                             {first.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${i*0.1}s`}}>{c}</span>)}
                         </h1>
-                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase text-stroke text-zinc-200 dark:text-zinc-800 flex">
+                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase text-stroke text-zinc-300 flex select-none">
                             {last.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${0.5 + i*0.1}s`}}>{c}</span>)}
                         </h1>
                     </div>
                     <div className="mt-8">
-                        <span className="text-[3vw] md:text-[1.5vw] font-black tracking-[1.2em] uppercase text-zinc-900/5 dark:text-zinc-100/10">Creative Manager</span>
+                        <span className="text-[3vw] md:text-[1.5vw] font-black tracking-[1.4em] uppercase text-zinc-300 select-none">Creative Manager</span>
                     </div>
-                    <div className="mt-12 flex flex-col items-center gap-6 opacity-0 animate-[fadeIn_1s_ease-out_forwards_2.2s] pointer-events-auto">
-                        <div className="px-8 py-3 rounded-full border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-white/5 text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3 text-zinc-600 dark:text-zinc-300">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                            </span>
-                            Ready for Collaboration
+                </div>
+            );
+        };
+
+        const AboutMe = ({ onBack }) => {
+            const experiences = [
+                {
+                    company: "Inuxu Digital Media Tech. Pvt. Ltd.",
+                    role: "Creative Manager",
+                    period: "2015 — Present",
+                    desc: "Leading creative direction, team management, and innovative digital solutions."
+                },
+                {
+                    company: "Affinity Express",
+                    role: "Visual Designer",
+                    period: "2013 — 2015",
+                    desc: "Specialized in high-volume visual design and corporate branding assets."
+                }
+            ];
+
+            return (
+                <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-200 pb-8 gap-6">
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-black uppercase text-zinc-400">Profile</span>
+                            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900">About Me</h2>
+                        </div>
+                        <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">Back</button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                        {/* Work History */}
+                        <div className="space-y-12">
+                             <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500"></span> Work History
+                             </h3>
+                             <div className="relative border-l border-zinc-200 ml-3 space-y-12 pl-8 pb-4">
+                                {experiences.map((exp, i) => (
+                                    <div key={i} className="relative group">
+                                        <span className="absolute -left-[37px] top-2 w-4 h-4 rounded-full border-2 border-zinc-200 bg-zinc-50 group-hover:border-indigo-500 transition-colors"></span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 block mb-2">{exp.period}</span>
+                                        <h4 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{exp.role}</h4>
+                                        <h5 className="text-sm font-medium text-zinc-500 mb-4">{exp.company}</h5>
+                                        <p className="text-sm text-zinc-500 leading-relaxed">{exp.desc}</p>
+                                    </div>
+                                ))}
+                             </div>
+                        </div>
+
+                        {/* Right Column: Education & Contact */}
+                        <div className="space-y-12">
+                            {/* Education */}
+                            <div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Education
+                                    </h3>
+                                <div className="bg-white p-8 rounded-[2rem] border border-zinc-200 shadow-xl hover:-translate-y-2 transition-transform">
+                                    <h4 className="text-xl md:text-2xl font-bold text-zinc-900 mb-2">Diploma in 3D Animation & VFX</h4>
+                                    <p className="text-zinc-500 text-sm leading-relaxed">Specialized in visual effects pipelines, 3D modeling, and motion graphics composition.</p>
+                                </div>
+                            </div>
+
+                             {/* Contact */}
+                            <div>
+                                <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
+                                    <span className="w-2 h-2 rounded-full bg-rose-500"></span> Connect
+                                </h3>
+                                <div className="grid gap-4">
+                                    <a href="mailto:sonawnemayur828@gmail.com" className="bg-white p-6 rounded-[2rem] border border-zinc-200 shadow-lg hover:border-indigo-500/50 transition-all flex items-center gap-4 group">
+                                        <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                                            <span className="material-icons">mail</span>
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Email</div>
+                                            <div className="text-sm md:text-base font-bold text-zinc-900 break-all">sonawnemayur828@gmail.com</div>
+                                        </div>
+                                    </a>
+                                    <a href="tel:+919561787649" className="bg-white p-6 rounded-[2rem] border border-zinc-200 shadow-lg hover:border-emerald-500/50 transition-all flex items-center gap-4 group">
+                                        <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                            <span className="material-icons">phone</span>
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Mobile</div>
+                                            <div className="text-sm md:text-base font-bold text-zinc-900">+91 9561787649</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const Footer = ({ isDarkMode, onToggleTheme, onManifestoClick }) => (
-            <footer className="fixed bottom-0 left-0 right-0 z-50 p-8 flex justify-between items-end">
-                <div className="glass-panel bg-zinc-100/80 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full p-1 flex">
-                    <button onClick={() => !isDarkMode && onToggleTheme()} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${isDarkMode ? 'bg-zinc-700 text-white' : 'text-zinc-500'}`}>Dark</button>
-                    <button onClick={() => isDarkMode && onToggleTheme()} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!isDarkMode ? 'bg-white text-black shadow-sm' : 'text-zinc-500'}`}>Light</button>
-                </div>
-                <button onClick={onManifestoClick} className="flex items-center gap-3 group">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">Manifesto</span>
-                    <div className="w-10 h-10 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center group-hover:translate-y-1 transition-transform">
-                        <span className="material-icons text-sm">keyboard_arrow_down</span>
-                    </div>
-                </button>
-            </footer>
-        );
+        const ProjectCard = ({ project, onCategoryChange }) => {
+            const [imgIndex, setImgIndex] = useState(0);
+            const images = Array.isArray(project.img) ? project.img : [project.img];
+            
+            const nextImage = (e) => {
+                e.stopPropagation();
+                setImgIndex((prev) => (prev + 1) % images.length);
+            };
 
-        const ProjectGrid = ({ category, onBack }) => {
+            const prevImage = (e) => {
+                e.stopPropagation();
+                setImgIndex((prev) => (prev - 1 + images.length) % images.length);
+            };
+
+            const handleClick = () => {
+                if (project.internalLink && onCategoryChange) {
+                    onCategoryChange(project.internalLink);
+                } else if (project.link) {
+                    window.open(project.link, '_blank');
+                }
+            };
+
+            return (
+                <div 
+                    onClick={handleClick} 
+                    className={`group relative bg-white rounded-[3rem] overflow-hidden border border-zinc-200 transition-all hover:-translate-y-4 shadow-xl ${project.link || project.internalLink ? 'cursor-pointer' : ''}`}
+                >
+                    <div className="aspect-[3/4] overflow-hidden bg-zinc-100 relative">
+                        <img 
+                            src={images[imgIndex]} 
+                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                            alt={project.title}
+                        />
+                        
+                        {images.length > 1 && (
+                            <>
+                                <button 
+                                    onClick={prevImage}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
+                                >
+                                    <span className="material-icons text-zinc-900 text-sm">chevron_left</span>
+                                </button>
+                                <button 
+                                    onClick={nextImage}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
+                                >
+                                    <span className="material-icons text-zinc-900 text-sm">chevron_right</span>
+                                </button>
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {images.map((_, idx) => (
+                                        <div 
+                                            key={idx} 
+                                            className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === imgIndex ? 'bg-white' : 'bg-white/40'}`}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                        {/* Indicator for internal navigation folders */}
+                        {project.internalLink && (
+                             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur p-2 rounded-full shadow-lg">
+                                <span className="material-icons text-zinc-900 text-sm">folder_open</span>
+                             </div>
+                        )}
+                    </div>
+                    <div className="p-10">
+                        <h3 className="text-2xl font-bold mb-2 text-zinc-900 flex items-center gap-2">
+                            {project.title}
+                            {project.internalLink && <span className="material-icons text-zinc-400 text-lg">arrow_forward</span>}
+                        </h3>
+                        <p className="text-zinc-500 text-sm leading-relaxed">{project.desc}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const ProjectGrid = ({ category, onBack, onCategoryChange }) => {
             const projects = {
                 'rich-media': [
-                    { title: "Hocco", desc: "Interactive Gaming Experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", tags: ["Game", "UI"], link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html" },
-                    { title: "Nerolac Spark", desc: "Digital color experience", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", tags: ["Interactive", "Web"], link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" }
+                    { title: "Hocco", desc: "Interactive engagement experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html" },
+                    { title: "Nerolac Spark", desc: "Digital color experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" }
                 ],
-                'branding': [
-                    { title: "Hair Essentials", desc: "The core ritual branding", img: "https://r.jina.ai/i/61f2249e088147d394e505cc334586f3", tags: ["Branding", "Care"] }
+                'branding': [ 
+                  { 
+                    title: "Timb", 
+                    desc: "Comprehensive brand identity. Click to view full project.", 
+                    img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg",
+                    internalLink: 'timb'
+                  },
+                  {
+                    title: "Digital Banners",
+                    desc: "Strategic visual campaigns and promotional assets.",
+                    img: "https://images.unsplash.com/photo-1626785774573-4b7993143d2d?q=80&w=1080&auto=format&fit=crop",
+                    link: "https://collection.cloudinary.com/dfpw3illt/a23b6316d02c7e9bac9f1086e3319414"
+                  }
                 ],
-                'banners': [
-                    { title: "Zenith Apparel", desc: "Brutalist web layouts", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1080&auto=format&fit=crop", tags: ["Layout", "Fashion"] }
+                'timb': [
+                    {
+                        title: "Core Identity",
+                        desc: "Visual language and primary brand elements.",
+                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg"
+                    },
+                    {
+                        title: "Hair Care Line",
+                        desc: "Packaging design for the specialized hair care series.",
+                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/HairCare_lo2aop.jpg"
+                    },
+                    {
+                        title: "Skincare Collection",
+                        desc: "Product presentation and packaging for skincare.",
+                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/Skincare_lfnv7h.jpg"
+                    },
+                    {
+                        title: "Natural Ingredients",
+                        desc: "Celebrating organic roots with Amla and Gulabkali imagery.",
+                        img: [
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Amla_640_aamzht.jpg"
+                        ]
+                    },
+                    {
+                        title: "Visual Assets",
+                        desc: "Supplementary brand graphics and campaign textures.",
+                        img: [
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image7_g9z22w.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image3_yh2nxa.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image6_xls9sw.jpg"
+                        ]
+                    },
+                    {
+                        title: "Campaign Photography",
+                        desc: "Lifestyle and mood photography for brand storytelling.",
+                        img: [
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image1_a3bisz.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image2_fqzmae.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image6_shloat.jpg",
+                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321214/Image4_htm2jz.jpg"
+                        ]
+                    }
                 ],
-                'social': [
-                    { title: "Vanguard Stories", desc: "Instagram immersive design", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1080&auto=format&fit=crop", tags: ["Social", "Creative"] }
+                'social': [ 
+                  { 
+                    title: "Vanguard Stories", 
+                    desc: "Instagram immersive narrative design.", 
+                    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1080&auto=format&fit=crop" 
+                  } 
                 ]
             };
             const items = projects[category] || [];
+            
+            // Determine back button label
+            const backLabel = category === 'timb' ? 'Back to Branding' : 'Back';
+
             return (
                 <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-200 dark:border-white/10 pb-8 gap-6">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-200 pb-8 gap-6">
                         <div className="space-y-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Portfolio</span>
-                            <h2 className="text-6xl font-black uppercase tracking-tighter text-zinc-900 dark:text-white">{category.replace('-', ' ')}</h2>
+                            <span className="text-[10px] font-black uppercase text-zinc-400">Portfolio</span>
+                            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900 capitalize">{category.replace('-', ' ')}</h2>
                         </div>
-                        <button onClick={onBack} className="px-8 py-3 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2">
-                            <span className="material-icons text-sm">arrow_back</span> Back
-                        </button>
+                        <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">{backLabel}</button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {items.map((p, i) => (
-                            <div 
-                                key={i} 
-                                onClick={() => p.link && window.open(p.link, '_blank')}
-                                className={`group bg-white dark:bg-zinc-900/50 rounded-[2.5rem] overflow-hidden border border-zinc-200 dark:border-white/5 hover:-translate-y-2 transition-all ${p.link ? 'cursor-pointer' : ''}`}
-                            >
-                                <div className="aspect-[4/5] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                                    <img src={p.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                                </div>
-                                <div className="p-8">
-                                    <div className="flex gap-2 mb-4">
-                                        {p.tags.map(t => <span key={t} className="text-[8px] border border-zinc-200 dark:border-white/20 px-2 py-1 rounded-full uppercase font-black text-zinc-500">{t}</span>)}
-                                    </div>
-                                    <h3 className="text-2xl font-bold mb-2 text-zinc-900 dark:text-white">{p.title}</h3>
-                                    <p className="text-zinc-500 text-sm leading-relaxed">{p.desc}</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {items.length > 0 ? items.map((p, i) => (
+                            <ProjectCard key={i} project={p} onCategoryChange={onCategoryChange} />
+                        )) : (
+                            <div className="col-span-full py-20 text-center text-zinc-400 uppercase tracking-widest text-xs">More projects coming soon...</div>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        const ManifestoModal = ({ onClose }) => (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={onClose} />
-                <div className="relative w-full max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 p-12 rounded-[3rem] animate-fadeIn text-center">
-                    <div className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 dark:text-zinc-500 mb-8">Designer Manifesto</div>
-                    <p className="text-2xl font-medium leading-relaxed italic text-zinc-700 dark:text-zinc-200">
-                        "Design is the silent management of chaos, where logic meets the untamed beauty of human connection. We curate digital experiences through strategic management and creative vision."
-                    </p>
-                    <button onClick={onClose} className="mt-12 mx-auto w-12 h-12 rounded-full border border-zinc-200 dark:border-white/10 flex items-center justify-center hover:bg-zinc-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors">
-                        <span className="material-icons">close</span>
-                    </button>
-                </div>
-            </div>
-        );
-
-        // --- MAIN APP ---
         const App = () => {
-            const [isDarkMode, setIsDarkMode] = useState(true);
             const [activeCategory, setActiveCategory] = useState(null);
-            const [isManifestoOpen, setIsManifestoOpen] = useState(false);
 
             useEffect(() => {
-                document.documentElement.className = isDarkMode ? 'dark' : '';
-                if (activeCategory) {
-                    document.body.style.overflow = 'auto';
+                // Ensure overflow changes based on active category
+                document.body.style.overflow = activeCategory ? 'auto' : 'hidden';
+            }, [activeCategory]);
+            
+            const handleBack = () => {
+                if (activeCategory === 'timb') {
+                    setActiveCategory('branding');
                 } else {
-                    document.body.style.overflow = 'hidden';
+                    setActiveCategory(null);
                 }
-            }, [isDarkMode, activeCategory]);
+            };
 
             return (
-                <div className={`min-h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white' : 'bg-gray-50 text-zinc-900'}`}>
+                <div className="min-h-screen">
                     <FloatingBackground isDimmed={!!activeCategory} />
                     <Navbar onCategorySelect={setActiveCategory} onHomeClick={() => setActiveCategory(null)} />
                     
-                    {activeCategory ? (
-                        <ProjectGrid category={activeCategory} onBack={() => setActiveCategory(null)} />
+                    {activeCategory === 'about-me' ? (
+                        <AboutMe onBack={() => setActiveCategory(null)} />
+                    ) : activeCategory ? (
+                        <ProjectGrid 
+                            category={activeCategory} 
+                            onBack={handleBack} 
+                            onCategoryChange={setActiveCategory} 
+                        />
                     ) : (
                         <Hero />
                     )}
 
-                    <Footer 
-                        isDarkMode={isDarkMode} 
-                        onToggleTheme={() => setIsDarkMode(!isDarkMode)} 
-                        onManifestoClick={() => setIsManifestoOpen(true)}
-                    />
-
-                    {isManifestoOpen && <ManifestoModal onClose={() => setIsManifestoOpen(false)} />}
+                    <footer className="fixed bottom-0 left-0 right-0 z-50 p-8 flex justify-between items-end pointer-events-none">
+                       {/* Footer buttons removed as per request */}
+                    </footer>
                 </div>
             );
         };
