@@ -48,18 +48,19 @@
         }
         .letter-anim { display: inline-block; opacity: 0; animation: letterFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 
-        @keyframes revolve {
+        /* Solar System Orbit Animation */
+        @keyframes orbit {
           from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
           to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
         }
-        @keyframes drift {
-          0% { margin-top: 0px; margin-left: 0px; }
-          100% { margin-top: 15px; margin-left: 10px; }
-        }
+        
         @keyframes bubblePopIn {
-          0% { transform: scale(0) rotate(-15deg); opacity: 0; filter: blur(5px); }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; filter: blur(0px); }
+          0% { transform: scale(0); opacity: 0; filter: blur(5px); }
+          100% { transform: scale(1); opacity: 1; filter: blur(0px); }
         }
+        
+        /* Perspective class for 3D carousel */
+        .perspective-1000 { perspective: 1000px; }
     </style>
 <script type="importmap">
 {
@@ -79,37 +80,44 @@
         const { useState, useEffect, useRef } = React;
 
         // --- BACKGROUND COMPONENTS ---
-        const LiquidBubble = ({ label, isSpecial, initialX, initialY, size, orbitRadius, orbitSpeed, index }) => (
-            <div className="absolute pointer-events-none opacity-30"
-                style={{
-                    left: `${initialX}%`, top: `${initialY}%`, width: size, height: size,
-                    animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, revolve ${orbitSpeed}s linear infinite, drift 10s ease-in-out infinite alternate`,
-                    animationDelay: `${index * 0.1}s, 0s, 0s`,
-                    '--orbit-radius': `${orbitRadius}px`,
-                }}>
-                <div className={`w-full h-full flex items-center justify-center rounded-full border border-zinc-300 backdrop-blur-md transition-all duration-700 ${isSpecial ? 'bg-indigo-500/10' : 'bg-zinc-900/5'}`}>
-                    <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest text-center px-2 leading-tight ${isSpecial ? 'text-indigo-600' : 'text-zinc-500'}`}>
-                        {label}
-                    </span>
+        const LiquidBubble = ({ label, isSpecial, size, radius, duration, startOffset, index }) => {
+            return (
+                <div className="absolute pointer-events-none opacity-30"
+                    style={{
+                        left: '50%', 
+                        top: '50%', 
+                        width: size, 
+                        height: size,
+                        marginTop: `calc(-1 * ${size} / 2)`,
+                        marginLeft: `calc(-1 * ${size} / 2)`,
+                        '--orbit-radius': radius,
+                        animation: `bubblePopIn 1.2s cubic-bezier(0.34, 1.7, 0.64, 1) forwards, orbit ${duration}s linear infinite`,
+                        animationDelay: `${index * 0.1}s, -${startOffset}s`,
+                    }}>
+                    <div className={`w-full h-full flex items-center justify-center rounded-full border border-zinc-300 backdrop-blur-md transition-all duration-700 ${isSpecial ? 'bg-indigo-500/10' : 'bg-zinc-900/5'}`}>
+                        <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-widest text-center px-2 leading-tight ${isSpecial ? 'text-indigo-600' : 'text-zinc-500'}`}>
+                            {label}
+                        </span>
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        };
 
         const FloatingBackground = ({ isDimmed }) => {
             const bubbles = [
-                { label: "Visual Design", size: "5.5rem", x: 25, y: 25, orbitRadius: 80, orbitSpeed: 45, isSpecial: true },
-                { label: "Motion", size: "4.5rem", x: 70, y: 20, orbitRadius: 60, orbitSpeed: 38 },
-                { label: "CGI", size: "4rem", x: 45, y: 15, orbitRadius: 40, orbitSpeed: 30 },
-                { label: "AI", size: "4.5rem", x: 15, y: 60, orbitRadius: 90, orbitSpeed: 50, isSpecial: true },
-                { label: "Photoshop", size: "5.2rem", x: 75, y: 55, orbitRadius: 75, orbitSpeed: 42 },
-                { label: "Illustrator", size: "5rem", x: 35, y: 75, orbitRadius: 100, orbitSpeed: 55 },
-                { label: "After Effects", size: "5.4rem", x: 60, y: 78, orbitRadius: 110, orbitSpeed: 48, isSpecial: true },
-                { label: "InDesign", size: "4.8rem", x: 55, y: 40, orbitRadius: 70, orbitSpeed: 35 }
+                { label: "Visual Design", size: "5.5rem", radius: "35vmin", duration: 45, startOffset: 0, isSpecial: true },
+                { label: "Motion", size: "4.5rem", radius: "42vmin", duration: 38, startOffset: 12 },
+                { label: "CGI", size: "4rem", radius: "28vmin", duration: 30, startOffset: 5 },
+                { label: "AI", size: "4.5rem", radius: "50vmin", duration: 50, startOffset: 25, isSpecial: true },
+                { label: "Photoshop", size: "5.2rem", radius: "38vmin", duration: 42, startOffset: 18 },
+                { label: "Illustrator", size: "5rem", radius: "45vmin", duration: 55, startOffset: 35 },
+                { label: "After Effects", size: "5.4rem", radius: "55vmin", duration: 48, startOffset: 10, isSpecial: true },
+                { label: "InDesign", size: "4.8rem", radius: "32vmin", duration: 35, startOffset: 20 }
             ];
             return (
-                <div className={`fixed inset-0 z-0 transition-all duration-[2000ms] ${isDimmed ? 'opacity-5 blur-3xl scale-110' : 'opacity-100'}`}>
+                <div className={`fixed inset-0 z-0 transition-all duration-[2000ms] overflow-hidden ${isDimmed ? 'opacity-5 blur-3xl scale-110' : 'opacity-100'}`}>
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.04)_0%,transparent_70%)]"></div>
-                    {bubbles.map((b, i) => <LiquidBubble key={i} index={i} {...b} initialX={b.x} initialY={b.y} />)}
+                    {bubbles.map((b, i) => <LiquidBubble key={i} index={i} {...b} />)}
                 </div>
             );
         };
@@ -120,8 +128,6 @@
                 { label: 'Rich Media', id: 'rich-media' },
                 { label: 'Banners', id: 'banners' },
                 { label: 'Branding', id: 'branding' },
-                // Timb Removed from top-level
-                { label: 'Social', id: 'social' },
                 { label: 'Wallpapers', id: 'wallpapers' },
                 { label: 'Marketing', id: 'marketing' },
                 { label: 'About Me', id: 'about-me' }
@@ -146,18 +152,38 @@
         const Hero = () => {
             const first = "MAYUR".split("");
             const last = "SONAWANE".split("");
+
+            const getKerning = (word, i) => {
+                if (word === 'MAYUR') {
+                    if (i === 1) return "-mr-[1.5vw] md:-mr-[0.5vw]";
+                }
+                if (word === 'SONAWANE') {
+                    if (i === 3) return "-mr-[2.5vw] md:-mr-[0.8vw]";
+                    if (i === 4) return "-mr-[2.5vw] md:-mr-[0.8vw]";
+                }
+                return "";
+            };
+
             return (
-                <div className="relative z-10 flex flex-col items-center justify-end h-screen w-full pointer-events-none px-6 pb-32">
-                    <div className="text-[10px] tracking-[0.8em] uppercase text-zinc-400 font-black mb-12 animate-fadeIn">Design & Innovation</div>
-                    <div className="flex flex-col items-center">
-                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase flex text-zinc-900 select-none">
-                            {first.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${i*0.1}s`}}>{c}</span>)}
+                <div className="relative z-10 flex flex-col items-center justify-center h-screen w-full pointer-events-none px-4 md:px-6 pb-20">
+                    <div className="text-[10px] tracking-[0.8em] uppercase text-zinc-400 font-black mb-12 animate-fadeIn text-center">Design & Innovation</div>
+                    <div className="flex flex-col items-center w-full">
+                        <h1 className="text-[13vw] md:text-[10vw] leading-none font-black uppercase flex justify-center gap-[0.5vw] md:gap-[0.1vw] text-zinc-900 select-none w-full">
+                            {first.map((c, i) => (
+                                <span key={i} className={`letter-anim ${getKerning('MAYUR', i)}`} style={{animationDelay: `${i*0.1}s`}}>
+                                    {c}
+                                </span>
+                            ))}
                         </h1>
-                        <h1 className="text-[15vw] md:text-[10vw] leading-none font-black tracking-tighter uppercase text-stroke text-zinc-300 flex select-none">
-                            {last.map((c, i) => <span key={i} className="letter-anim" style={{animationDelay: `${0.5 + i*0.1}s`}}>{c}</span>)}
+                        <h1 className="text-[13vw] md:text-[10vw] leading-none font-black uppercase text-stroke text-zinc-300 flex justify-center gap-[0.5vw] md:gap-[0.1vw] select-none w-full">
+                            {last.map((c, i) => (
+                                <span key={i} className={`letter-anim ${getKerning('SONAWANE', i)}`} style={{animationDelay: `${0.5 + i*0.1}s`}}>
+                                    {c}
+                                </span>
+                            ))}
                         </h1>
                     </div>
-                    <div className="mt-8">
+                    <div className="mt-8 text-center">
                         <span className="text-[3vw] md:text-[1.5vw] font-black tracking-[1.4em] uppercase text-zinc-300 select-none">Creative Manager</span>
                     </div>
                 </div>
@@ -191,7 +217,6 @@
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                        {/* Work History */}
                         <div className="space-y-12">
                              <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
                                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span> Work History
@@ -209,9 +234,7 @@
                              </div>
                         </div>
 
-                        {/* Right Column: Education & Contact */}
                         <div className="space-y-12">
-                            {/* Education */}
                             <div>
                                 <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
                                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Education
@@ -222,7 +245,6 @@
                                 </div>
                             </div>
 
-                             {/* Contact */}
                             <div>
                                 <h3 className="text-2xl font-black uppercase tracking-tight text-zinc-900 mb-8 flex items-center gap-3">
                                     <span className="w-2 h-2 rounded-full bg-rose-500"></span> Connect
@@ -312,7 +334,6 @@
                                 </div>
                             </>
                         )}
-                        {/* Indicator for internal navigation folders */}
                         {project.internalLink && (
                              <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur p-2 rounded-full shadow-lg">
                                 <span className="material-icons text-zinc-900 text-sm">folder_open</span>
@@ -329,12 +350,159 @@
                 </div>
             );
         };
+        
+        // --- 3D Carousel Component (Renamed from TimbCarousel to generic Carousel3D) ---
+        const Carousel3D = ({ images, onBack, title = "Project", categoryLabel = "Project", aspectRatio = "square" }) => {
+            const [activeIndex, setActiveIndex] = useState(0);
+            const len = images.length;
+            
+            const next = () => setActiveIndex((prev) => (prev + 1) % len);
+            const prev = () => setActiveIndex((prev) => (prev - 1 + len) % len);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'ArrowRight') next();
+                    if (e.key === 'ArrowLeft') prev();
+                    if (e.key === 'Escape') onBack();
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            return (
+                <div className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden animate-fadeIn">
+                     {/* Header inside carousel view */}
+                     <div className="absolute top-8 left-0 right-0 z-50 flex justify-between items-start px-8 pt-20 max-w-7xl mx-auto w-full pointer-events-none">
+                        <div className="space-y-2 pointer-events-auto">
+                            <span className="text-[10px] font-black uppercase text-zinc-400">{categoryLabel}</span>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900">{title}</h2>
+                        </div>
+                        <button onClick={onBack} className="pointer-events-auto bg-zinc-900 text-white px-6 py-2 md:px-8 md:py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">Back</button>
+                    </div>
+
+                    <div className="relative w-full h-[60vh] md:h-[70vh] perspective-[1000px] flex items-center justify-center mt-10">
+                        {images.map((src, i) => {
+                            let offset = i - activeIndex;
+                            if (offset > len / 2) offset -= len;
+                            else if (offset < -len / 2) offset += len;
+                            
+                            const absOffset = Math.abs(offset);
+                            const isActive = offset === 0;
+
+                            if (absOffset > 3) return null;
+
+                            // Determine dimensions based on aspect ratio prop
+                            // Square: 60vmin x 60vmin
+                            // Video (16:9): 80vw x 45vw (approx, constrained)
+                            const dimensions = aspectRatio === 'video' 
+                                ? { width: '80vw', height: '45vw', maxWidth: '1400px', maxHeight: '787.5px' } 
+                                : { width: '60vmin', height: '60vmin' };
+
+                            return (
+                                <div
+                                    key={i}
+                                    onClick={() => setActiveIndex(i)}
+                                    className="absolute transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
+                                    style={{
+                                        ...dimensions,
+                                        zIndex: 50 - absOffset,
+                                        transform: `
+                                            translateX(${offset * 60}%) 
+                                            scale(${1 - absOffset * 0.15}) 
+                                            rotateY(${offset * -35}deg)
+                                        `,
+                                        opacity: absOffset > 2 ? 0 : 1,
+                                        filter: isActive ? 'none' : 'brightness(0.9) blur(1px)',
+                                    }}
+                                >
+                                    <div className="w-full h-full p-2 md:p-4 bg-white rounded-[2rem] shadow-2xl border border-zinc-100 flex items-center justify-center overflow-hidden relative group">
+                                         <div className="absolute inset-0 border-[4px] border-zinc-100 rounded-[2rem] pointer-events-none"></div>
+                                         <img 
+                                            src={src} 
+                                            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                                            alt=""
+                                         />
+                                    </div>
+                                    {isActive && (
+                                        <div className="absolute -bottom-12 left-4 right-4 h-4 bg-black/20 blur-xl rounded-full"></div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="absolute bottom-12 flex gap-4 z-50">
+                        <button onClick={prev} className="w-12 h-12 bg-white rounded-full shadow-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors">
+                            <span className="material-icons">chevron_left</span>
+                        </button>
+                        <button onClick={next} className="w-12 h-12 bg-white rounded-full shadow-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors">
+                            <span className="material-icons">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
 
         const ProjectGrid = ({ category, onBack, onCategoryChange }) => {
+            if (category === 'timb') {
+                const timbImages = [
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Amla_640_aamzht.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image7_g9z22w.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image3_yh2nxa.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image6_xls9sw.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image1_a3bisz.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image2_fqzmae.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image6_shloat.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321214/Image4_htm2jz.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/Skincare_lfnv7h.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/HairCare_lo2aop.jpg"
+                ];
+                return <Carousel3D title="Timb" categoryLabel="Project" images={timbImages} onBack={onBack} />;
+            }
+            
+            if (category === 'banners') {
+                const bannerImages = [
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770910282/2500x2500_Cargo_zch8sy.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770910282/2500x2500_Truck_napgq6.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770910282/2500x2500_Kids_twid0r.jpg"
+                ];
+                return <Carousel3D title="Banners" categoryLabel="Portfolio" images={bannerImages} onBack={onBack} />;
+            }
+
+            if (category === 'wallpapers') {
+                const wallpaperImages = [
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912308/1600x900_khxojd.jpg"
+                ];
+                return <Carousel3D title="Wallpapers" categoryLabel="Portfolio" images={wallpaperImages} onBack={onBack} aspectRatio="video" />;
+            }
+
+            if (category === 'marketing') {
+                const marketingImages = [
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912333/2_iers1e.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/Outro_qancph.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/2_1_yjkiii.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/10_rykxhm.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912331/3_cicona.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043611/Screen1_n23jqm.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen5_zk2cxz.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen3_anylpe.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen6_cuyhpg.jpg"
+                ];
+                return <Carousel3D title="Marketing" categoryLabel="Portfolio" images={marketingImages} onBack={onBack} />;
+            }
+
             const projects = {
                 'rich-media': [
                     { title: "Hocco", desc: "Interactive engagement experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html" },
-                    { title: "Nerolac Spark", desc: "Digital color experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" }
+                    { title: "Nerolac Spark", desc: "Digital color experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" },
+                    { title: "Burgundy", desc: "Premium lifestyle campaign.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/burgundy_dkczne.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Burgundy.html" },
+                    { title: "Vettaiyan", desc: "Cinematic visual experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/vettaiyan_l1doha.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/vettaiyan.html" },
+                    { title: "Cadbury Lickables", desc: "Gamified product engagement.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/Lickables_gi94pi.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/cadburyFlappy.html" },
+                    { title: "Toyota Fortuner", desc: "Automotive interactive showcase.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/Fortuner_odxvgm.jpg", link: "https://demo.adgebra.in/adgebra_splash/toyota_fortuner.html" },
+                    { title: "Nissan GTR", desc: "High-performance digital ad.", img: "https://images.unsplash.com/photo-1600712242805-5f78671b24da?q=80&w=1080&auto=format&fit=crop", link: "https://demo.adgebra.in/splash/nissan-gtr.html" },
+                    { title: "Firstcry", desc: "E-commerce visual storytelling.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894596/Firstcry_wzqpst.jpg", link: "https://demo.adgebra.in/splash/firstcry7.html" }
                 ],
                 'branding': [ 
                   { 
@@ -342,69 +510,10 @@
                     desc: "Comprehensive brand identity. Click to view full project.", 
                     img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg",
                     internalLink: 'timb'
-                  },
-                  {
-                    title: "Digital Banners",
-                    desc: "Strategic visual campaigns and promotional assets.",
-                    img: "https://images.unsplash.com/photo-1626785774573-4b7993143d2d?q=80&w=1080&auto=format&fit=crop",
-                    link: "https://collection.cloudinary.com/dfpw3illt/a23b6316d02c7e9bac9f1086e3319414"
                   }
-                ],
-                'timb': [
-                    {
-                        title: "Core Identity",
-                        desc: "Visual language and primary brand elements.",
-                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg"
-                    },
-                    {
-                        title: "Hair Care Line",
-                        desc: "Packaging design for the specialized hair care series.",
-                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/HairCare_lo2aop.jpg"
-                    },
-                    {
-                        title: "Skincare Collection",
-                        desc: "Product presentation and packaging for skincare.",
-                        img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/Skincare_lfnv7h.jpg"
-                    },
-                    {
-                        title: "Natural Ingredients",
-                        desc: "Celebrating organic roots with Amla and Gulabkali imagery.",
-                        img: [
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Amla_640_aamzht.jpg"
-                        ]
-                    },
-                    {
-                        title: "Visual Assets",
-                        desc: "Supplementary brand graphics and campaign textures.",
-                        img: [
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image7_g9z22w.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321229/Image3_yh2nxa.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image6_xls9sw.jpg"
-                        ]
-                    },
-                    {
-                        title: "Campaign Photography",
-                        desc: "Lifestyle and mood photography for brand storytelling.",
-                        img: [
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321228/Image1_a3bisz.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image2_fqzmae.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321215/Image6_shloat.jpg",
-                            "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321214/Image4_htm2jz.jpg"
-                        ]
-                    }
-                ],
-                'social': [ 
-                  { 
-                    title: "Vanguard Stories", 
-                    desc: "Instagram immersive narrative design.", 
-                    img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1080&auto=format&fit=crop" 
-                  } 
                 ]
             };
             const items = projects[category] || [];
-            
-            // Determine back button label
             const backLabel = category === 'timb' ? 'Back to Branding' : 'Back';
 
             return (
@@ -416,6 +525,15 @@
                         </div>
                         <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">{backLabel}</button>
                     </div>
+
+                    {category === 'rich-media' && (
+                        <div className="mb-16 max-w-3xl animate-fadeIn" style={{animationDelay: '0.1s'}}>
+                            <p className="text-zinc-500 text-sm md:text-base leading-relaxed">
+                                I design high-impact rich media ads that blend storytelling, interaction, and cinematic visuals. From scroll-stopping display innovations to immersive mobile experiences, I craft performance-driven creatives that feel premium, intuitive, and unforgettable. Every project is built with precision—clean design, fluid motion, and purposeful engagement that elevates brands beyond the banner.
+                            </p>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                         {items.length > 0 ? items.map((p, i) => (
                             <ProjectCard key={i} project={p} onCategoryChange={onCategoryChange} />
