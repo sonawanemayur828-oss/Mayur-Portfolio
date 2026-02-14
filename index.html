@@ -444,8 +444,8 @@
         };
 
         const ProjectGrid = ({ category, onBack, onCategoryChange }) => {
-            if (category === 'timb') {
-                const timbImages = [
+            if (category === 'branding') {
+                const brandingImages = [
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Amla_640_aamzht.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg",
@@ -459,7 +459,7 @@
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/Skincare_lfnv7h.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/HairCare_lo2aop.jpg"
                 ];
-                return <Carousel3D title="Timb" categoryLabel="Project" images={timbImages} onBack={onBack} />;
+                return <Carousel3D title="Branding" categoryLabel="Portfolio" images={brandingImages} onBack={onBack} />;
             }
             
             if (category === 'banners') {
@@ -503,18 +503,10 @@
                     { title: "Toyota Fortuner", desc: "Automotive interactive showcase.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/Fortuner_odxvgm.jpg", link: "https://demo.adgebra.in/adgebra_splash/toyota_fortuner.html" },
                     { title: "Nissan GTR", desc: "High-performance digital ad.", img: "https://images.unsplash.com/photo-1600712242805-5f78671b24da?q=80&w=1080&auto=format&fit=crop", link: "https://demo.adgebra.in/splash/nissan-gtr.html" },
                     { title: "Firstcry", desc: "E-commerce visual storytelling.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894596/Firstcry_wzqpst.jpg", link: "https://demo.adgebra.in/splash/firstcry7.html" }
-                ],
-                'branding': [ 
-                  { 
-                    title: "Timb", 
-                    desc: "Comprehensive brand identity. Click to view full project.", 
-                    img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768321814/1_fkvcru.jpg",
-                    internalLink: 'timb'
-                  }
                 ]
             };
             const items = projects[category] || [];
-            const backLabel = category === 'timb' ? 'Back to Branding' : 'Back';
+            const backLabel = 'Back';
 
             return (
                 <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
@@ -554,11 +546,7 @@
             }, [activeCategory]);
             
             const handleBack = () => {
-                if (activeCategory === 'timb') {
-                    setActiveCategory('branding');
-                } else {
-                    setActiveCategory(null);
-                }
+                setActiveCategory(null);
             };
 
             return (
