@@ -209,12 +209,21 @@
 
             return (
                 <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-200 pb-8 gap-6">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-zinc-200 pb-8 gap-6">
                         <div className="space-y-2">
                             <span className="text-[10px] font-black uppercase text-zinc-400">Profile</span>
                             <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900">About Me</h2>
                         </div>
                         <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">Back</button>
+                    </div>
+
+                    <div className="mb-16 max-w-4xl">
+                         <h3 className="text-2xl md:text-3xl font-medium leading-relaxed text-zinc-800">
+                            I am a results-driven <span className="text-indigo-600 font-bold">Creative Manager</span> with over a decade of experience in digital media, visual design, and team leadership.
+                         </h3>
+                         <p className="mt-6 text-zinc-500 text-base md:text-lg leading-relaxed">
+                            My expertise lies in bridging the gap between creative vision and strategic execution, delivering high-impact rich media campaigns, branding identities, and immersive digital experiences. Currently leading creative operations at Inuxu Digital Media, I foster a culture of innovation while ensuring operational efficiency. I am passionate about leveraging design technology to solve complex business challenges and elevate brand storytelling across all platforms.
+                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -329,22 +338,22 @@
                         .carousel-item {
                             --c-width: ${
                                 aspectRatio === 'video' ? '80vw' : 
-                                aspectRatio === 'portrait' ? '70vw' : '70vw'
+                                aspectRatio === 'portrait' ? '55vw' : '70vw'
                             };
                             --c-height: ${
                                 aspectRatio === 'video' ? '45vw' : 
-                                aspectRatio === 'portrait' ? '93vw' : '70vw'
+                                aspectRatio === 'portrait' ? '73vw' : '70vw'
                             };
                         }
                         @media (min-width: 1024px) {
                             .carousel-item {
                                 --c-width: ${
                                     aspectRatio === 'video' ? '45vw' : 
-                                    aspectRatio === 'portrait' ? '28vw' : '35vw'
+                                    aspectRatio === 'portrait' ? '22vw' : '35vw'
                                 };
                                 --c-height: ${
                                     aspectRatio === 'video' ? '25.3vw' : 
-                                    aspectRatio === 'portrait' ? '37vw' : '35vw'
+                                    aspectRatio === 'portrait' ? '30vw' : '35vw'
                                 };
                             }
                         }
