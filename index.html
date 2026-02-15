@@ -352,7 +352,7 @@
         };
         
         // --- 3D Carousel Component (Renamed from TimbCarousel to generic Carousel3D) ---
-        const Carousel3D = ({ images, onBack, title = "Project", categoryLabel = "Project", aspectRatio = "square" }) => {
+        const Carousel3D = ({ images, onBack, title = "Project", categoryLabel = "Project", aspectRatio = "square", description }) => {
             const [activeIndex, setActiveIndex] = useState(0);
             const len = images.length;
             
@@ -373,9 +373,12 @@
                 <div className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden animate-fadeIn">
                      {/* Header inside carousel view */}
                      <div className="absolute top-8 left-0 right-0 z-50 flex justify-between items-start px-8 pt-20 max-w-7xl mx-auto w-full pointer-events-none">
-                        <div className="space-y-2 pointer-events-auto">
+                        <div className="space-y-2 pointer-events-auto max-w-xl">
                             <span className="text-[10px] font-black uppercase text-zinc-400">{categoryLabel}</span>
                             <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900">{title}</h2>
+                            {description && (
+                                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed pt-2">{description}</p>
+                            )}
                         </div>
                         <button onClick={onBack} className="pointer-events-auto bg-zinc-900 text-white px-6 py-2 md:px-8 md:py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">Back</button>
                     </div>
@@ -444,6 +447,14 @@
         };
 
         const ProjectGrid = ({ category, onBack, onCategoryChange }) => {
+            const descriptions = {
+                'rich-media': "I design high-impact rich media ads that blend storytelling, interaction, and cinematic visuals. From scroll-stopping display innovations to immersive mobile experiences, I craft performance-driven creatives that feel premium, intuitive, and unforgettable.",
+                'banners': "High-performance digital display advertising designed to capture attention. My work focuses on strong visual hierarchy, clear messaging, and brand consistency across all formats.",
+                'branding': "Comprehensive brand identity design that tells a compelling story. From logos to visual systems, I build brands that resonate and stand the test of time.",
+                'wallpapers': "A curated collection of high-resolution digital art and wallpapers. Exploring abstract forms and vibrant colors to transform screens into digital canvases.",
+                'marketing': "Strategic marketing assets and social media creatives. Visuals designed to engage communities, boost performance, and amplify the brand voice."
+            };
+
             if (category === 'branding') {
                 const brandingImages = [
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
@@ -459,7 +470,7 @@
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/Skincare_lfnv7h.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322128/HairCare_lo2aop.jpg"
                 ];
-                return <Carousel3D title="Branding" categoryLabel="Portfolio" images={brandingImages} onBack={onBack} />;
+                return <Carousel3D title="Branding" categoryLabel="Portfolio" images={brandingImages} onBack={onBack} description={descriptions['branding']} />;
             }
             
             if (category === 'banners') {
@@ -468,14 +479,21 @@
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1770910282/2500x2500_Truck_napgq6.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1770910282/2500x2500_Kids_twid0r.jpg"
                 ];
-                return <Carousel3D title="Banners" categoryLabel="Portfolio" images={bannerImages} onBack={onBack} />;
+                return <Carousel3D title="Banners" categoryLabel="Portfolio" images={bannerImages} onBack={onBack} description={descriptions['banners']} />;
             }
 
             if (category === 'wallpapers') {
                 const wallpaperImages = [
-                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912308/1600x900_khxojd.jpg"
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771141057/Diwali_pdqsoq.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771141057/1600x900_2_cuel88.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771141056/1600x900_4_laawnw.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771141055/1600x900_3_eaqnsm.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771140953/ufoday_fn9rg6.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771140916/1600x900_1_hvcaub.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771140842/1600x900_ji7vjo.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1771140673/1600x900_spuzrz.jpg"
                 ];
-                return <Carousel3D title="Wallpapers" categoryLabel="Portfolio" images={wallpaperImages} onBack={onBack} aspectRatio="video" />;
+                return <Carousel3D title="Wallpapers" categoryLabel="Portfolio" images={wallpaperImages} onBack={onBack} aspectRatio="video" description={descriptions['wallpapers']} />;
             }
 
             if (category === 'marketing') {
@@ -490,7 +508,7 @@
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen3_anylpe.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen6_cuyhpg.jpg"
                 ];
-                return <Carousel3D title="Marketing" categoryLabel="Portfolio" images={marketingImages} onBack={onBack} />;
+                return <Carousel3D title="Marketing" categoryLabel="Portfolio" images={marketingImages} onBack={onBack} description={descriptions['marketing']} />;
             }
 
             const projects = {
@@ -518,10 +536,10 @@
                         <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">{backLabel}</button>
                     </div>
 
-                    {category === 'rich-media' && (
+                    {descriptions[category] && (
                         <div className="mb-16 max-w-3xl animate-fadeIn" style={{animationDelay: '0.1s'}}>
                             <p className="text-zinc-500 text-sm md:text-base leading-relaxed">
-                                I design high-impact rich media ads that blend storytelling, interaction, and cinematic visuals. From scroll-stopping display innovations to immersive mobile experiences, I craft performance-driven creatives that feel premium, intuitive, and unforgettable. Every project is built with precision—clean design, fluid motion, and purposeful engagement that elevates brands beyond the banner.
+                                {descriptions[category]}
                             </p>
                         </div>
                     )}
