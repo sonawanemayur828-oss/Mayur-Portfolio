@@ -127,6 +127,7 @@
             const navItems = [
                 { label: 'Rich Media', id: 'rich-media' },
                 { label: 'Banners', id: 'banners' },
+                { label: 'Presentations', id: 'presentations' },
                 { label: 'Branding', id: 'branding' },
                 { label: 'Wallpapers', id: 'wallpapers' },
                 { label: 'Marketing', id: 'marketing' },
@@ -275,89 +276,39 @@
                 </div>
             );
         };
-
-        const ProjectCard = ({ project, onCategoryChange }) => {
-            const [imgIndex, setImgIndex] = useState(0);
-            const images = Array.isArray(project.img) ? project.img : [project.img];
-            
-            const nextImage = (e) => {
-                e.stopPropagation();
-                setImgIndex((prev) => (prev + 1) % images.length);
-            };
-
-            const prevImage = (e) => {
-                e.stopPropagation();
-                setImgIndex((prev) => (prev - 1 + images.length) % images.length);
-            };
-
-            const handleClick = () => {
-                if (project.internalLink && onCategoryChange) {
-                    onCategoryChange(project.internalLink);
-                } else if (project.link) {
-                    window.open(project.link, '_blank');
-                }
-            };
-
-            return (
-                <div 
-                    onClick={handleClick} 
-                    className={`group relative bg-white rounded-[3rem] overflow-hidden border border-zinc-200 transition-all hover:-translate-y-4 shadow-xl ${project.link || project.internalLink ? 'cursor-pointer' : ''}`}
-                >
-                    <div className="aspect-[3/4] overflow-hidden bg-zinc-100 relative">
-                        <img 
-                            src={images[imgIndex]} 
-                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
-                            alt={project.title}
-                        />
-                        
-                        {images.length > 1 && (
-                            <>
-                                <button 
-                                    onClick={prevImage}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
-                                >
-                                    <span className="material-icons text-zinc-900 text-sm">chevron_left</span>
-                                </button>
-                                <button 
-                                    onClick={nextImage}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10"
-                                >
-                                    <span className="material-icons text-zinc-900 text-sm">chevron_right</span>
-                                </button>
-                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {images.map((_, idx) => (
-                                        <div 
-                                            key={idx} 
-                                            className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === imgIndex ? 'bg-white' : 'bg-white/40'}`}
-                                        />
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                        {project.internalLink && (
-                             <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur p-2 rounded-full shadow-lg">
-                                <span className="material-icons text-zinc-900 text-sm">folder_open</span>
-                             </div>
-                        )}
-                    </div>
-                    <div className="p-10">
-                        <h3 className="text-2xl font-bold mb-2 text-zinc-900 flex items-center gap-2">
-                            {project.title}
-                            {project.internalLink && <span className="material-icons text-zinc-400 text-lg">arrow_forward</span>}
-                        </h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed">{project.desc}</p>
-                    </div>
-                </div>
-            );
-        };
         
-        // --- 3D Carousel Component (Renamed from TimbCarousel to generic Carousel3D) ---
-        const Carousel3D = ({ images, onBack, title = "Project", categoryLabel = "Project", aspectRatio = "square", description }) => {
+        // --- 3D Carousel Component ---
+        const Carousel3D = ({ 
+            images, 
+            items, // Support for dynamic items (objects with title, desc, img, link)
+            onBack, 
+            title = "Project", 
+            categoryLabel = "Portfolio", 
+            aspectRatio = "square", 
+            description 
+        }) => {
             const [activeIndex, setActiveIndex] = useState(0);
-            const len = images.length;
             
+            // Determine data source
+            const dataSource = items || images;
+            const len = dataSource ? dataSource.length : 0;
+            
+            // Derive current display values
+            const currentTitle = items ? items[activeIndex].title : title;
+            const currentDesc = items ? items[activeIndex].desc : description;
+            const currentImages = items ? items.map(i => i.img) : images;
+            const currentLink = items ? items[activeIndex].link : null;
+
             const next = () => setActiveIndex((prev) => (prev + 1) % len);
             const prev = () => setActiveIndex((prev) => (prev - 1 + len) % len);
+
+            const handleItemClick = (index) => {
+                if (index === activeIndex && currentLink) {
+                    window.open(currentLink, '_blank');
+                } else {
+                    setActiveIndex(index);
+                }
+            };
 
             useEffect(() => {
                 const handleKeyDown = (e) => {
@@ -369,78 +320,136 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, []);
 
+            if (!len) return null;
+
             return (
-                <div className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden animate-fadeIn">
-                     {/* Header inside carousel view */}
-                     <div className="absolute top-8 left-0 right-0 z-50 flex justify-between items-start px-8 pt-20 max-w-7xl mx-auto w-full pointer-events-none">
-                        <div className="space-y-2 pointer-events-auto max-w-xl">
-                            <span className="text-[10px] font-black uppercase text-zinc-400">{categoryLabel}</span>
-                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-zinc-900">{title}</h2>
-                            {description && (
-                                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed pt-2">{description}</p>
-                            )}
-                        </div>
-                        <button onClick={onBack} className="pointer-events-auto bg-zinc-900 text-white px-6 py-2 md:px-8 md:py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">Back</button>
-                    </div>
+                <div className="relative w-full h-screen flex flex-col lg:flex-row overflow-hidden animate-fadeIn bg-background-light">
+                     {/* Inject dynamic styles based on aspect ratio */}
+                     <style>{`
+                        .carousel-item {
+                            --c-width: ${
+                                aspectRatio === 'video' ? '80vw' : 
+                                aspectRatio === 'portrait' ? '70vw' : '70vw'
+                            };
+                            --c-height: ${
+                                aspectRatio === 'video' ? '45vw' : 
+                                aspectRatio === 'portrait' ? '93vw' : '70vw'
+                            };
+                        }
+                        @media (min-width: 1024px) {
+                            .carousel-item {
+                                --c-width: ${
+                                    aspectRatio === 'video' ? '45vw' : 
+                                    aspectRatio === 'portrait' ? '28vw' : '35vw'
+                                };
+                                --c-height: ${
+                                    aspectRatio === 'video' ? '25.3vw' : 
+                                    aspectRatio === 'portrait' ? '37vw' : '35vw'
+                                };
+                            }
+                        }
+                     `}</style>
 
-                    <div className="relative w-full h-[60vh] md:h-[70vh] perspective-[1000px] flex items-center justify-center mt-10">
-                        {images.map((src, i) => {
-                            let offset = i - activeIndex;
-                            if (offset > len / 2) offset -= len;
-                            else if (offset < -len / 2) offset += len;
+                    {/* LEFT SIDE: Description & Controls */}
+                    <div className="w-full lg:w-[40%] h-[35vh] lg:h-full flex flex-col justify-center px-6 md:px-12 lg:pl-20 lg:pr-8 z-30 relative bg-background-light/95 backdrop-blur-sm lg:bg-transparent">
+                         <div className="pointer-events-auto space-y-4 lg:space-y-8 max-w-xl pt-20 lg:pt-0">
+                            <div className="space-y-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 block flex items-center gap-2">
+                                    <span className="w-4 h-[1px] bg-zinc-400"></span>
+                                    {categoryLabel}
+                                </span>
+                                <h2 className="text-3xl md:text-4xl lg:text-7xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.9] transition-all duration-300">
+                                    {currentTitle}
+                                </h2>
+                            </div>
                             
-                            const absOffset = Math.abs(offset);
-                            const isActive = offset === 0;
-
-                            if (absOffset > 3) return null;
-
-                            // Determine dimensions based on aspect ratio prop
-                            // Square: 60vmin x 60vmin
-                            // Video (16:9): 80vw x 45vw (approx, constrained)
-                            const dimensions = aspectRatio === 'video' 
-                                ? { width: '80vw', height: '45vw', maxWidth: '1400px', maxHeight: '787.5px' } 
-                                : { width: '60vmin', height: '60vmin' };
-
-                            return (
-                                <div
-                                    key={i}
-                                    onClick={() => setActiveIndex(i)}
-                                    className="absolute transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
-                                    style={{
-                                        ...dimensions,
-                                        zIndex: 50 - absOffset,
-                                        transform: `
-                                            translateX(${offset * 60}%) 
-                                            scale(${1 - absOffset * 0.15}) 
-                                            rotateY(${offset * -35}deg)
-                                        `,
-                                        opacity: absOffset > 2 ? 0 : 1,
-                                        filter: isActive ? 'none' : 'brightness(0.9) blur(1px)',
-                                    }}
-                                >
-                                    <div className="w-full h-full p-2 md:p-4 bg-white rounded-[2rem] shadow-2xl border border-zinc-100 flex items-center justify-center overflow-hidden relative group">
-                                         <div className="absolute inset-0 border-[4px] border-zinc-100 rounded-[2rem] pointer-events-none"></div>
-                                         <img 
-                                            src={src} 
-                                            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                                            alt=""
-                                         />
-                                    </div>
-                                    {isActive && (
-                                        <div className="absolute -bottom-12 left-4 right-4 h-4 bg-black/20 blur-xl rounded-full"></div>
-                                    )}
+                            {currentDesc && (
+                                <p className="text-zinc-500 text-xs md:text-sm leading-relaxed border-l-2 border-zinc-200 pl-4 line-clamp-4 lg:line-clamp-none transition-all duration-300">
+                                    {currentDesc}
+                                </p>
+                            )}
+                            
+                            {currentLink && (
+                                <div className="pt-2">
+                                    <button 
+                                        onClick={() => window.open(currentLink, '_blank')}
+                                        className="inline-flex items-center gap-2 bg-zinc-900 text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-zinc-700 transition-colors shadow-lg"
+                                    >
+                                        View Project <span className="material-icons text-xs">open_in_new</span>
+                                    </button>
                                 </div>
-                            );
-                        })}
+                            )}
+
+                            {/* Navigation Controls aligned with text */}
+                            <div className="flex items-center gap-6 pt-2 lg:pt-6">
+                                 <div className="flex gap-3">
+                                    <button onClick={prev} className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-zinc-200 bg-white flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-all shadow-lg active:scale-95">
+                                        <span className="material-icons text-sm lg:text-base">chevron_left</span>
+                                    </button>
+                                    <button onClick={next} className="w-10 h-10 lg:w-12 lg:h-12 rounded-full border border-zinc-200 bg-white flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-all shadow-lg active:scale-95">
+                                        <span className="material-icons text-sm lg:text-base">chevron_right</span>
+                                    </button>
+                                </div>
+                                <button onClick={onBack} className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors flex items-center gap-2 px-4 py-2 rounded-full hover:bg-zinc-100">
+                                     Back to Menu
+                                </button>
+                            </div>
+                         </div>
                     </div>
 
-                    <div className="absolute bottom-12 flex gap-4 z-50">
-                        <button onClick={prev} className="w-12 h-12 bg-white rounded-full shadow-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors">
-                            <span className="material-icons">chevron_left</span>
-                        </button>
-                        <button onClick={next} className="w-12 h-12 bg-white rounded-full shadow-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-900 hover:text-white transition-colors">
-                            <span className="material-icons">chevron_right</span>
-                        </button>
+                    {/* RIGHT SIDE: Carousel */}
+                    <div className="w-full lg:w-[60%] h-[65vh] lg:h-full relative perspective-[1000px] flex items-center justify-center bg-zinc-50/50 -mt-8 lg:mt-0 overflow-hidden">
+                         {/* Background decoration for right side */}
+                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.02)_0%,transparent_70%)]"></div>
+
+                         <div className="relative w-full h-full flex items-center justify-center top-4 lg:top-0">
+                            {currentImages.map((src, i) => {
+                                let offset = i - activeIndex;
+                                if (offset > len / 2) offset -= len;
+                                else if (offset < -len / 2) offset += len;
+                                
+                                const absOffset = Math.abs(offset);
+                                const isActive = offset === 0;
+
+                                if (absOffset > 3) return null;
+
+                                return (
+                                    <div
+                                        key={i}
+                                        onClick={() => handleItemClick(i)}
+                                        className="carousel-item absolute transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer origin-center"
+                                        style={{
+                                            width: isActive ? 'var(--c-width)' : 'calc(var(--c-width) * 0.85)',
+                                            height: isActive ? 'var(--c-height)' : 'calc(var(--c-height) * 0.85)',
+                                            zIndex: 50 - absOffset,
+                                            transform: `
+                                                translateX(calc(${offset * 60}%)) 
+                                                scale(${1 - absOffset * 0.1}) 
+                                                rotateY(${offset * -25}deg)
+                                            `,
+                                            opacity: absOffset > 2 ? 0 : 1,
+                                            filter: isActive ? 'none' : 'brightness(0.9) grayscale(0.2) blur(1px)',
+                                        }}
+                                    >
+                                        <div className="w-full h-full p-2 bg-white rounded-[1rem] lg:rounded-[1.5rem] shadow-2xl border border-zinc-200/60 flex items-center justify-center overflow-hidden relative group">
+                                                <img 
+                                                    src={src} 
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                    alt=""
+                                                />
+                                                {/* Hover hint for clickable items */}
+                                                {isActive && currentLink && (
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                                    </div>
+                                                )}
+                                        </div>
+                                        {isActive && (
+                                            <div className="absolute -bottom-12 left-8 right-8 h-6 bg-black/10 blur-2xl rounded-full"></div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                         </div>
                     </div>
                 </div>
             );
@@ -452,9 +461,11 @@
                 'banners': "High-performance digital display advertising designed to capture attention. My work focuses on strong visual hierarchy, clear messaging, and brand consistency across all formats.",
                 'branding': "Comprehensive brand identity design that tells a compelling story. From logos to visual systems, I build brands that resonate and stand the test of time.",
                 'wallpapers': "A curated collection of high-resolution digital art and wallpapers. Exploring abstract forms and vibrant colors to transform screens into digital canvases.",
-                'marketing': "Strategic marketing assets and social media creatives. Visuals designed to engage communities, boost performance, and amplify the brand voice."
+                'marketing': "Strategic marketing assets and social media creatives. Visuals designed to engage communities, boost performance, and amplify the brand voice.",
+                'presentations': "Compelling corporate presentations and pitch decks that combine data visualization with storytelling. Crafted to persuade, inform, and leave a lasting impression."
             };
 
+            // DATA SOURCES
             if (category === 'branding') {
                 const brandingImages = [
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1768322185/Gulabkali_1_baaofs.jpg",
@@ -502,17 +513,23 @@
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/Outro_qancph.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/2_1_yjkiii.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912332/10_rykxhm.jpg",
-                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912331/3_cicona.jpg",
+                    "https://res.cloudinary.com/dfpw3illt/image/upload/v1770912331/3_cicona.jpg"
+                ];
+                return <Carousel3D title="Marketing" categoryLabel="Portfolio" images={marketingImages} onBack={onBack} description={descriptions['marketing']} />;
+            }
+            
+            if (category === 'presentations') {
+                const presentationImages = [
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043611/Screen1_n23jqm.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen5_zk2cxz.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen3_anylpe.jpg",
                     "https://res.cloudinary.com/dfpw3illt/image/upload/v1771043608/Screen6_cuyhpg.jpg"
                 ];
-                return <Carousel3D title="Marketing" categoryLabel="Portfolio" images={marketingImages} onBack={onBack} description={descriptions['marketing']} />;
+                return <Carousel3D title="Presentations" categoryLabel="Portfolio" images={presentationImages} onBack={onBack} aspectRatio="video" description={descriptions['presentations']} />;
             }
 
-            const projects = {
-                'rich-media': [
+            if (category === 'rich-media') {
+                 const richMediaItems = [
                     { title: "Hocco", desc: "Interactive engagement experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285625/Hocco_ewjnlw.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Hocco.html" },
                     { title: "Nerolac Spark", desc: "Digital color experience.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1768285943/Nerolac_r3qzot.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Nerolac_New.html" },
                     { title: "Burgundy", desc: "Premium lifestyle campaign.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/burgundy_dkczne.jpg", link: "https://demo.adgebra.in/custom/demos/adg_spark/Burgundy.html" },
@@ -521,38 +538,11 @@
                     { title: "Toyota Fortuner", desc: "Automotive interactive showcase.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894597/Fortuner_odxvgm.jpg", link: "https://demo.adgebra.in/adgebra_splash/toyota_fortuner.html" },
                     { title: "Nissan GTR", desc: "High-performance digital ad.", img: "https://images.unsplash.com/photo-1600712242805-5f78671b24da?q=80&w=1080&auto=format&fit=crop", link: "https://demo.adgebra.in/splash/nissan-gtr.html" },
                     { title: "Firstcry", desc: "E-commerce visual storytelling.", img: "https://res.cloudinary.com/dfpw3illt/image/upload/v1770894596/Firstcry_wzqpst.jpg", link: "https://demo.adgebra.in/splash/firstcry7.html" }
-                ]
-            };
-            const items = projects[category] || [];
-            const backLabel = 'Back';
+                ];
+                return <Carousel3D categoryLabel="Rich Media" items={richMediaItems} onBack={onBack} aspectRatio="portrait" />;
+            }
 
-            return (
-                <div className="relative z-40 pt-32 pb-24 px-8 max-w-7xl mx-auto min-h-screen animate-fadeIn">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-zinc-200 pb-8 gap-6">
-                        <div className="space-y-2">
-                            <span className="text-[10px] font-black uppercase text-zinc-400">Portfolio</span>
-                            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-zinc-900 capitalize">{category.replace('-', ' ')}</h2>
-                        </div>
-                        <button onClick={onBack} className="bg-zinc-900 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform shadow-lg">{backLabel}</button>
-                    </div>
-
-                    {descriptions[category] && (
-                        <div className="mb-16 max-w-3xl animate-fadeIn" style={{animationDelay: '0.1s'}}>
-                            <p className="text-zinc-500 text-sm md:text-base leading-relaxed">
-                                {descriptions[category]}
-                            </p>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                        {items.length > 0 ? items.map((p, i) => (
-                            <ProjectCard key={i} project={p} onCategoryChange={onCategoryChange} />
-                        )) : (
-                            <div className="col-span-full py-20 text-center text-zinc-400 uppercase tracking-widest text-xs">More projects coming soon...</div>
-                        )}
-                    </div>
-                </div>
-            );
+            return null;
         };
 
         const App = () => {
